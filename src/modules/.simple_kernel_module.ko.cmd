@@ -1,0 +1,1 @@
+cmd_/home/akshay/Dropbox/Docs/os/src/modules/simple_kernel_module.ko := ld -r -m elf_x86_64 -T ./scripts/module-common.lds --build-id  -o /home/akshay/Dropbox/Docs/os/src/modules/simple_kernel_module.ko /home/akshay/Dropbox/Docs/os/src/modules/simple_kernel_module.o /home/akshay/Dropbox/Docs/os/src/modules/simple_kernel_module.mod.o ;  true
