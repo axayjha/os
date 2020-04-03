@@ -12,7 +12,7 @@ enum {
 
 typedef struct mem_partition mem_partition;
 struct mem_partition {
-	char id;
+	char id; // id = 'H' means an empty hole, otherwise denotes a process id
 	uint64_t start_addr;
 	int size;
 	mem_partition *next;
@@ -60,7 +60,7 @@ void first_fit(mem_partition *listp, char id, int size)
 		fprintf(stderr, "Memory partition not allocated\n");
 
 	for( ; walkp != NULL; walkp = walkp->next) {
-		if (walkp->id == 'H' && walkp->size >= size) {
+		if (walkp->id == 'H' && walkp->size >= size) { // hole found with sufficient size
 			if (walkp->size - size > 0){
 				mem_partition* temp = walkp->next;
 				walkp->next = new_node('H', (walkp->start_addr + size), (walkp->size - size));
@@ -88,7 +88,7 @@ void best_fit(mem_partition *listp, char id, int size)
 		fprintf(stderr, "Memory partition not allocated\n");
 
 	for( ; walkp != NULL; walkp = walkp->next) {
-		if (walkp->id == 'H' && walkp->size >= size) {
+		if (walkp->id == 'H' && walkp->size >= size) { // hole found with sufficient size
 			if (min > walkp->size - size) 
 				min = walkp->size - size;
 		}			
@@ -123,7 +123,7 @@ void worst_fit(mem_partition *listp, char id, int size)
 		fprintf(stderr, "Memory partition not allocated\n");
 
 	for( ; walkp != NULL; walkp = walkp->next) {
-		if (walkp->id == 'H' && walkp->size >= size) {
+		if (walkp->id == 'H' && walkp->size >= size) { // hole found with sufficient size
 			if (max < walkp->size - size) 
 				max = walkp->size - size;
 		}			
@@ -157,7 +157,7 @@ mem_partition* compact_partition(mem_partition* listp)
 	if(listp == NULL)
 		fprintf(stderr, "Memory partition not allocated\n");
 	for( ; walkp != NULL; walkp = walkp->next) {
-		if (walkp->id == 'H') {
+		if (walkp->id == 'H') { // hole found
 			total_size += walkp->size;			
 		}
 		else{
@@ -168,7 +168,7 @@ mem_partition* compact_partition(mem_partition* listp)
 
 	mem_partition* prev = NULL;
 	for(walkp = listp; walkp!= NULL; walkp = walkp->next) {
-		if (walkp->id == 'H') {
+		if (walkp->id == 'H') { // hole found
 			if(prev == NULL)
 				listp = walkp->next;
 			else
@@ -177,7 +177,7 @@ mem_partition* compact_partition(mem_partition* listp)
 		}
 		prev = walkp;
 	}
-	listp = addend(listp, 'H', end_addr, total_size);
+	listp = addend(listp, 'H', end_addr, total_size); // all holes ('H') compiled into one
 	return listp;
 }
 
@@ -185,11 +185,12 @@ mem_partition* compact_partition(mem_partition* listp)
 
 int main(int argc, char *argv[])
 {
-	mem_partition *list = new_node('G', 0, 100 );
-	list = addend(list, 'H', 100, 80);
+	mem_partition *list = new_node('G', 0, 100 ); // an id other than 'H' means a process
+	list = addend(list, 'H', 100, 80); // id = 'H' means en empty hole
 	list = addend(list, 'J', 180, 80);
-	list = addend(list, 'H', 260, 40);
+	list = addend(list, 'H', 260, 40); // another hole
 	list = addend(list, 'N', 300, 40);
+	display(list);
 	best_fit(list, 'L', 30);
 	display(list);
 	list = compact_partition(list);
