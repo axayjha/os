@@ -48,7 +48,7 @@ addend(mem_partition *listp,
 void display(mem_partition *walkp)
 {	
 	for( ; walkp != NULL; walkp = walkp->next)
-			printf("[ %c| %ld| %u ]-> ", walkp->id, walkp->start_addr, walkp->size);
+			printf("[ %c| %llu| %u ]-> ", walkp->id, walkp->start_addr, walkp->size);
 	printf(".\n");	
 }
 
@@ -95,7 +95,7 @@ void best_fit(mem_partition *listp, char id, int size)
 	}
 
 	for(walkp = listp ; walkp != NULL; walkp = walkp->next) {
-		if ((walkp->size - size) == min){
+		if ((walkp->size - size) == min && walkp->id == 'H'){
 			if (walkp->size - size > 0){
 				mem_partition* temp = walkp->next;
 				walkp->next = new_node('H', (walkp->start_addr + size), (walkp->size - size));
@@ -130,7 +130,7 @@ void worst_fit(mem_partition *listp, char id, int size)
 	}
 
 	for(walkp = listp ; walkp != NULL; walkp = walkp->next) {
-		if ((walkp->size - size) == max){
+		if ((walkp->size - size) == max && walkp->id == 'H'){
 			if (walkp->size - size > 0){
 				mem_partition* temp = walkp->next;
 				walkp->next = new_node('H', (walkp->start_addr + size), (walkp->size - size));
@@ -177,7 +177,8 @@ mem_partition* compact_partition(mem_partition* listp)
 		}
 		prev = walkp;
 	}
-	listp = addend(listp, 'H', end_addr, total_size); // all holes ('H') compiled into one
+	if (total_size > 0) // only if total hole size is more than 0
+		listp = addend(listp, 'H', end_addr, total_size); // all holes ('H') compiled into one
 	return listp;
 }
 
@@ -185,15 +186,30 @@ mem_partition* compact_partition(mem_partition* listp)
 
 int main(int argc, char *argv[])
 {
+	/*
 	mem_partition *list = new_node('G', 0, 100 ); // an id other than 'H' means a process
-	list = addend(list, 'H', 100, 80); // id = 'H' means en empty hole
+	// list = addend(list, 'H', 100, 80); // id = 'H' means en empty hole
 	list = addend(list, 'J', 180, 80);
-	list = addend(list, 'H', 260, 40); // another hole
-	list = addend(list, 'N', 300, 40);
+	list = addend(list, 'H', 260, 3); // another hole
+	list = addend(list, 'N', 300, 3);
 	display(list);
-	best_fit(list, 'L', 30);
+	best_fit(list, 'L', 3);
+	display(list);
+	list = compact_partition(list);
+	display(list);*/
+
+	mem_partition *list = new_node('a', 0, 5);
+	list = addend(list, 'H', 5, 9);
+	list = addend(list, 'b', 14, 4);
+	list = addend(list, 'H', 18, 8);
+	list = addend(list, 'c', 26, 3);
+	list = addend(list, 'H', 29, 3);
+	display(list);
+	best_fit(list, 'L', 3);
 	display(list);
 	list = compact_partition(list);
 	display(list);
+
+
 	return 0;
 }
